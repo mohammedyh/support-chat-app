@@ -1,6 +1,10 @@
-import NextAuth from 'next-auth/next';
+import bcrypt from 'bcryptjs';
 import { NextAuthOptions } from 'next-auth';
+import NextAuth from 'next-auth/next';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import dbConnect from '../../../lib/dbConnect';
+
+import User from '../../../models/User';
 
 export const authOptions: NextAuthOptions = {
 	providers: [
@@ -12,14 +16,23 @@ export const authOptions: NextAuthOptions = {
 			// e.g. domain, username, password, 2FA token, etc.
 			// You can pass any HTML attribute to the <input> tag through the object.
 			credentials: {
-				email: { label: 'Email', type: 'text', placeholder: 'test@test.com' },
+				email: { label: 'Email', type: 'email', placeholder: 'test@test.com' },
 				password: { label: 'Password', type: 'password' },
 			},
 			async authorize(credentials, req) {
-				// Add logic here to look up the user from the credentials supplied
-				const user = { id: '1', name: 'J Smith', email: 'jsmith@example.com' };
+				if (!credentials?.email || !credentials?.password) {
+					return null;
+				}
+				await dbConnect();
 
-				if (user) {
+				const user = await User.findOne({
+					email: credentials.email.toLowerCase(),
+				});
+
+				if (
+					user &&
+					(await bcrypt.compare(credentials.password, user.password))
+				) {
 					// Any object returned will be saved in `user` property of the JWT
 					return user;
 				} else {
@@ -32,7 +45,9 @@ export const authOptions: NextAuthOptions = {
 		}),
 	],
 	pages: {
-		signIn: '/auth/login',
+		signIn: '/login',
+		signOut: '/logout',
+		newUser: '/register',
 	},
 };
 

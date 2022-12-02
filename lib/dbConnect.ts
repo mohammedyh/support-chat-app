@@ -13,6 +13,12 @@ if (!MONGODB_URI) {
  * in development. This prevents connections growing exponentially
  * during API Route usage.
  */
+
+// To fix TypeScript implicity any error for global.mongoose
+declare global {
+	var mongoose: any;
+}
+
 let cached = global.mongoose;
 
 if (!cached) {
@@ -26,10 +32,11 @@ async function dbConnect() {
 
 	if (!cached.promise) {
 		const opts = {
+			dbName: 'support-chat',
 			bufferCommands: false,
 		};
 
-		cached.promise = mongoose.connect(MONGODB_URI, opts).then(mongoose => {
+		cached.promise = mongoose.connect(MONGODB_URI!, opts).then(mongoose => {
 			return mongoose;
 		});
 	}

@@ -44,6 +44,7 @@ export default function Login({ csrfToken }: { csrfToken: string }) {
 									name="email"
 									placeholder="elon@tesla.com"
 									type="email"
+									defaultValue="mo@birdmarketing.co.uk"
 								/>
 							</FormControl>
 							<FormControl isRequired>
@@ -53,6 +54,7 @@ export default function Login({ csrfToken }: { csrfToken: string }) {
 									name="password"
 									placeholder="********"
 									type="password"
+									defaultValue="password"
 								/>
 							</FormControl>
 						</Stack>
@@ -82,7 +84,7 @@ export default function Login({ csrfToken }: { csrfToken: string }) {
 					</Text>
 
 					<Button variant="link" colorScheme="blue" size="sm">
-						<Link href="register">Sign up</Link>
+						<Link href="/register">Sign up</Link>
 					</Button>
 				</HStack>
 			</Stack>
