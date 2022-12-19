@@ -14,7 +14,7 @@ if (!MONGODB_URI) {
  * during API Route usage.
  */
 
-// To fix TypeScript implicity any error for global.mongoose
+// To fix TypeScript implicit any error for global.mongoose
 declare global {
 	var mongoose: any;
 }

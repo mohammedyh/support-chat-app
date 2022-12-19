@@ -32,7 +32,6 @@ function Register() {
 		}[];
 	} | null>(null);
 
-	// convert array into an object with the key being path and value being the message
 	const errors = useMemo(() => {
 		if (response?.errors?.length) {
 			const errors: Record<string, string> = {};
@@ -47,7 +46,6 @@ function Register() {
 			return {};
 		}
 	}, [response?.errors]);
-	console.log(errors);
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -89,7 +87,7 @@ function Register() {
 			<Stack spacing="8">
 				<Stack spacing="6" align="center">
 					<Image
-						src="/bird-logo.png"
+						src="/bird-logo-black.png"
 						alt="Company."
 						width={150}
 						marginX="auto"
@@ -100,6 +98,7 @@ function Register() {
 						</Heading>
 					</Stack>
 				</Stack>
+
 				<form action="/api/register" method="POST" onSubmit={handleSubmit}>
 					<Stack spacing="6">
 						<Stack spacing="5">

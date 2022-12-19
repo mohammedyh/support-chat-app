@@ -11,17 +11,89 @@ import {
 	Stack,
 	Text,
 	useBreakpointValue,
+	useColorMode,
 } from '@chakra-ui/react';
-import { getCsrfToken, getSession, useSession } from 'next-auth/react';
+import { GetServerSideProps } from 'next';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useMemo, useState } from 'react';
+import { loginSchema } from '../lib/auth';
+import { getSession } from '../lib/session';
+import validate from '../lib/validate';
 
-export default function Login({ csrfToken }: { csrfToken: string }) {
+function Login({ csrfToken }: { csrfToken: string }) {
+	const { colorMode } = useColorMode();
+	const router = useRouter();
+	const [loading, setLoading] = useState(false);
+	const [response, setResponse] = useState<{
+		success: boolean;
+		errors: {
+			message: string;
+			path: string | undefined;
+			type: string | undefined;
+			value: any;
+		}[];
+	} | null>(null);
+
+	const errors = useMemo(() => {
+		if (response?.errors?.length) {
+			const errors: Record<string, string> = {};
+
+			for (const { path, message } of response.errors) {
+				if (!path) continue;
+				errors[path] = message;
+			}
+
+			return errors;
+		} else {
+			return {};
+		}
+	}, [response?.errors]);
+
+	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+		e.preventDefault();
+		setLoading(true);
+
+		const formData = new FormData(e.currentTarget);
+		const data = {
+			email: formData.get('email'),
+			password: formData.get('password'),
+		};
+
+		let response = await validate(loginSchema, data);
+
+		if (response.success) {
+			const res = await fetch('/api/login', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data),
+			});
+			const json = await res.json();
+
+			if (json.redirect) {
+				router.push(json.redirect);
+				return;
+			} else {
+				response = json;
+			}
+		}
+
+		setResponse(response);
+		setLoading(false);
+	}
+
 	return (
 		<Container maxW="md" py={{ base: '12', md: '24' }}>
 			<Stack spacing="8">
 				<Stack spacing="6">
 					<Image
-						src="/bird-logo.png"
+						src={
+							colorMode === 'light'
+								? '/bird-logo-black.png'
+								: '/bird-logo-white.png'
+						}
 						alt="Company."
 						width={150}
 						marginX="auto"
@@ -33,7 +105,7 @@ export default function Login({ csrfToken }: { csrfToken: string }) {
 					</Stack>
 				</Stack>
 
-				<form method="post" action="/api/auth/callback/credentials">
+				<form method="POST" onSubmit={handleSubmit}>
 					<input name="csrfToken" type="hidden" defaultValue={csrfToken} />
 					<Stack spacing="6">
 						<Stack spacing="5">
@@ -92,10 +164,10 @@ export default function Login({ csrfToken }: { csrfToken: string }) {
 	);
 }
 
-// @ts-ignore
-export async function getServerSideProps(context) {
-	const session = await getSession(context);
+export const getServerSideProps : GetServerSideProps = async ({ req, res}) => {
+	const session = await getSession(req, res);
 
+	// not sure if this works since removing next-auth
 	if (session !== null) {
 		return {
 			redirect: {
@@ -106,7 +178,9 @@ export async function getServerSideProps(context) {
 	}
 	return {
 		props: {
-			csrfToken: await getCsrfToken(context),
+			// csrfToken: await getCsrfToken(context),
 		},
 	};
 }
+
+export default Login;

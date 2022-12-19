@@ -1,6 +1,5 @@
 import * as bcrypt from 'bcryptjs';
 import { NextApiRequest, NextApiResponse } from 'next';
-
 import { registerSchema } from '../../lib/auth';
 import dbConnect from '../../lib/dbConnect';
 import validate from '../../lib/validate';
@@ -14,8 +13,6 @@ export default async function handler(
 		return res.status(405).json({ success: false });
 	}
 
-	// check if user exists with email
-	// if not, create user or redirect to login page
 	const { result, ...response } = await validate(registerSchema, req.body);
 
 	if (result) {

@@ -1,7 +1,6 @@
 import { theme } from '@chakra-ui/pro-theme';
 import { ChakraProvider } from '@chakra-ui/react';
-import '@fontsource/inter';
-import { SessionProvider } from 'next-auth/react';
+import '@fontsource/inter/variable.css';
 import type { AppProps } from 'next/app';
 
 export default function App({
@@ -9,10 +8,8 @@ export default function App({
 	pageProps: { session, ...pageProps },
 }: AppProps) {
 	return (
-		<SessionProvider session={session}>
-			<ChakraProvider theme={theme}>
-				<Component {...pageProps} />
-			</ChakraProvider>
-		</SessionProvider>
+		<ChakraProvider theme={theme}>
+			<Component {...pageProps} />
+		</ChakraProvider>
 	);
 }
