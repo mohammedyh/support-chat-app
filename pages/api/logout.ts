@@ -14,4 +14,3 @@ export default async function handler(
 	session.destroy();
 	return res.status(200).json({ isLoggedIn: false });
 }
-// Check if this is right - with JDSports

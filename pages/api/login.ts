@@ -23,7 +23,6 @@ export default async function handler(
 
 		const user = await User.findOne({ email: result.email });
 
-		// If the user exists
 		if (user) {
 			// Check if the inputted password matches the database hashed password
 			if (await bcrypt.compare(result.password, user.password)) {

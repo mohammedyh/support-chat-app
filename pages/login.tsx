@@ -164,11 +164,10 @@ function Login({ csrfToken }: { csrfToken: string }) {
 	);
 }
 
-export const getServerSideProps : GetServerSideProps = async ({ req, res}) => {
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 	const session = await getSession(req, res);
 
-	// not sure if this works since removing next-auth
-	if (session !== null) {
+	if (session?.userId) {
 		return {
 			redirect: {
 				destination: '/',
@@ -177,10 +176,8 @@ export const getServerSideProps : GetServerSideProps = async ({ req, res}) => {
 		};
 	}
 	return {
-		props: {
-			// csrfToken: await getCsrfToken(context),
-		},
+		props: {},
 	};
-}
+};
 
 export default Login;
