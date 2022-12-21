@@ -10,7 +10,7 @@ export default async function handler(
 	}
 
 	const session = await getSession(req, res);
-
 	session.destroy();
+
 	return res.status(200).json({ isLoggedIn: false });
 }
