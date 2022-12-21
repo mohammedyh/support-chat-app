@@ -6,7 +6,7 @@ export const getSession = nextSession({
 	store: promisifyStore(
 		MongoStore.create({
 			mongoUrl: process.env.MONGODB_URI,
-			dbName: 'support-chat',
+			dbName: process.env.MONGODB_DBNAME,
 		}),
 	),
 });

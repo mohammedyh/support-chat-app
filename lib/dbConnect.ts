@@ -32,7 +32,7 @@ async function dbConnect() {
 
 	if (!cached.promise) {
 		const opts = {
-			dbName: 'support-chat',
+			dbName: process.env.MONGODB_DBNAME,
 			bufferCommands: false,
 		};
 
