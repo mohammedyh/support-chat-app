@@ -13,5 +13,8 @@ export const loginSchema = Yup.object({
 });
 
 export const messageSchema = Yup.object({
-	message: Yup.string().required('Message is required'),
+	message: Yup.string()
+		.transform(value => value?.trim())
+		.min(100, 'Message must have a minimum of 100 characters')
+		.required('Message is required'),
 });

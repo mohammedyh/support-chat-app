@@ -27,19 +27,45 @@ export default async function handler(
 		}
 
 		try {
+			const auth = Buffer.from(`${process.env.FRESHDESK_API_KEY}:X`).toString(
+				'base64',
+			);
+			const url = `https://${process.env.FRESHDESK_DOMAIN}/api/v2/tickets`;
+			const res = await fetch(url, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: 'Basic ' + auth,
+				},
+				body: JSON.stringify({
+					description: result.message,
+					subject: 'New message from Chat App',
+					email: user.email,
+					priority: 1,
+					status: 2,
+				}),
+			});
+
+			if (res.status < 200 || res.status >= 300) {
+				throw new Error();
+			}
+		} catch {
+			const text = `${result.message}\n\nSent from Chat App`;
 			await transporter.sendMail({
 				from: {
 					name: user.name,
-					address: user.email,
+					address: 'noreply@nest.birdmarketing.co.uk',
 				},
 				to: SUPPORT_EMAIL_ADDRESS,
-				subject: 'Chat app message',
-				text: result.message,
+				subject: 'New message from Chat App',
+				text,
+				html: text
+					.split('\n')
+					.filter(string => string.length !== 0)
+					.map(string => `<p>${string}</p>`)
+					.join('\n'),
 			});
-		} catch (e: unknown) {
-			console.log((e as Error).message);
 		}
-		return res.status(200).json({ message: 'Your message was sent' });
 	}
 
 	return res.status(response.success ? 200 : 400).json(response);
