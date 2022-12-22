@@ -6,7 +6,6 @@ import {
 	FormLabel,
 	Heading,
 	HStack,
-	Image,
 	Input,
 	Stack,
 	Text,
@@ -17,6 +16,7 @@ import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
+import Logo from '../components/Logo';
 import { loginSchema } from '../lib/auth';
 import { getSession } from '../lib/session';
 import validate from '../lib/validate';
@@ -88,16 +88,7 @@ function Login({ csrfToken }: { csrfToken: string }) {
 		<Container maxW="md" py={{ base: '12', md: '24' }}>
 			<Stack spacing="8">
 				<Stack spacing="6">
-					<Image
-						src={
-							colorMode === 'light'
-								? '/bird-logo-black.png'
-								: '/bird-logo-white.png'
-						}
-						alt="Company."
-						width={150}
-						marginX="auto"
-					/>
+					<Logo />
 					<Stack spacing={{ base: '2', md: '3' }} textAlign="center">
 						<Heading size={useBreakpointValue({ base: 'xs', md: 'sm' })}>
 							Log in to your account
@@ -143,6 +134,7 @@ function Login({ csrfToken }: { csrfToken: string }) {
 								color="white"
 								_hover={{ background: 'rgba(0, 0, 0, 0.75)' }}
 								type="submit"
+								isLoading={loading}
 							>
 								Sign In
 							</Button>
