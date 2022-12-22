@@ -3,6 +3,7 @@ import mongoose, { Document } from 'mongoose';
 export interface IUser extends Document {
 	name: string;
 	email: string;
+	company: string;
 	password: string;
 	status: string;
 	roles: string[];
@@ -11,6 +12,7 @@ export interface IUser extends Document {
 const UserSchema = new mongoose.Schema<IUser>({
 	name: String,
 	email: String,
+	company: String,
 	password: String,
 	status: String,
 	roles: Array,

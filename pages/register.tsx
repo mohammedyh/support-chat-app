@@ -7,16 +7,18 @@ import {
 	FormLabel,
 	Heading,
 	HStack,
-	Image,
 	Input,
 	Stack,
 	Text,
 	useBreakpointValue,
 } from '@chakra-ui/react';
+import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
+import Logo from '../components/Logo';
 import { registerSchema } from '../lib/auth';
+import { getSession } from '../lib/session';
 import validate from '../lib/validate';
 
 function Register() {
@@ -55,6 +57,7 @@ function Register() {
 		const data = {
 			name: formData.get('name'),
 			email: formData.get('email'),
+			company: formData.get('company'),
 			password: formData.get('password'),
 		};
 
@@ -86,12 +89,7 @@ function Register() {
 		<Container maxW="md" py={{ base: '12', md: '24' }}>
 			<Stack spacing="8">
 				<Stack spacing="6" align="center">
-					<Image
-						src="/bird-logo-black.png"
-						alt="Company."
-						width={150}
-						marginX="auto"
-					/>
+					<Logo />
 					<Stack spacing="3" textAlign="center">
 						<Heading size={useBreakpointValue({ base: 'xs', md: 'sm' })}>
 							Create an account
@@ -124,6 +122,18 @@ function Register() {
 								/>
 								{errors.email && (
 									<FormErrorMessage>{errors.email}</FormErrorMessage>
+								)}
+							</FormControl>
+							<FormControl isRequired isInvalid={!!errors.company}>
+								<FormLabel htmlFor="company">Company</FormLabel>
+								<Input
+									id="company"
+									type="text"
+									placeholder="Test Company Limited"
+									name="company"
+								/>
+								{errors.company && (
+									<FormErrorMessage>{errors.company}</FormErrorMessage>
 								)}
 							</FormControl>
 							<FormControl isRequired isInvalid={!!errors.password}>
@@ -171,3 +181,19 @@ function Register() {
 }
 
 export default Register;
+
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+	const session = await getSession(req, res);
+
+	if (session?.userId) {
+		return {
+			redirect: {
+				destination: '/',
+				permanent: false,
+			},
+		};
+	}
+	return {
+		props: {},
+	};
+};
