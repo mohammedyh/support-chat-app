@@ -156,6 +156,8 @@ function Login({ csrfToken }: { csrfToken: string }) {
 	);
 }
 
+export default Login;
+
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 	const session = await getSession(req, res);
 
@@ -171,5 +173,3 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 		props: {},
 	};
 };
-
-export default Login;
