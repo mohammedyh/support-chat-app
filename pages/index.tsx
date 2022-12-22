@@ -1,260 +1,260 @@
-import { MoonIcon, SunIcon } from '@chakra-ui/icons';
 import {
-	Avatar,
-	AvatarBadge,
 	Box,
 	Button,
-	ButtonGroup,
 	Container,
 	Flex,
+	FormControl,
+	FormErrorMessage,
+	FormLabel,
 	HStack,
 	Icon,
 	Input,
 	InputGroup,
 	InputLeftElement,
-	Menu,
-	MenuButton,
-	MenuItem,
-	MenuList,
+	Modal,
+	ModalBody,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+	ModalOverlay,
 	Stack,
-	Text,
 	Textarea,
-	Tooltip,
-	useColorMode,
 	useColorModeValue,
 	VStack,
 } from '@chakra-ui/react';
 import { GetServerSideProps } from 'next';
+import React, { useContext, useMemo, useState } from 'react';
 import { FiSearch } from 'react-icons/fi';
-import Logo from '../components/Logo';
-import { SocketContextProvider } from '../components/socket/context';
+import App, { AppContext } from '../components/App';
+import ChatHeader from '../components/ChatHeader';
+import Message from '../components/Message';
+import Navigation from '../components/Navigation';
+import UserListItem from '../components/UserListItem';
+import { messageSchema } from '../lib/auth';
+import dbConnect from '../lib/dbConnect';
 import { getSession } from '../lib/session';
+import { Contact } from '../lib/types';
+import validate from '../lib/validate';
+import User from '../models/User';
 
-export default function Home({ id, userId }: { id: string; userId: string }) {
-	const { colorMode, toggleColorMode } = useColorMode();
+function Home() {
+	const borderColor = useColorModeValue('gray.200', 'gray.700');
+	const app = useContext(AppContext);
+	const [content, setContent] = useState('');
+	const [loading, setLoading] = useState(false);
+	const [response, setResponse] = useState<{
+		success: boolean;
+		errors: {
+			message: string;
+			path: string | undefined;
+			type: string | undefined;
+			value: any;
+		}[];
+	} | null>(null);
+	const errors = useMemo(() => {
+		if (response?.errors?.length) {
+			const errors: Record<string, string> = {};
+
+			for (const { path, message } of response.errors) {
+				if (!path) continue;
+				errors[path] = message;
+			}
+
+			return errors;
+		} else {
+			return {};
+		}
+	}, [response?.errors]);
+
+	const user = useMemo(() => app.user, [app.user]);
+
+	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+		e.preventDefault();
+		setLoading(true);
+
+		// Handle empty textarea
+
+		const formData = new FormData(e.currentTarget);
+		const data = { message: formData.get('message') };
+
+		let response = await validate(messageSchema, data);
+
+		if (response.success) {
+			const res = await fetch('/api/contact-form', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(data),
+			});
+			const json = await res.json();
+
+			response = json;
+		}
+
+		setResponse(response);
+		setLoading(false);
+	}
 
 	return (
-		<SocketContextProvider>
-			<Stack spacing="0" height="100vh">
-				<Box
-					as="nav"
+		<Flex as="section" bg="bg-canvas" height="full">
+			{user.roles.includes('support-agent') && (
+				<Flex
+					flex="1"
 					bg="bg-surface"
-					boxShadow={useColorModeValue('sm', 'sm-dark')}
-					py="5"
-					px="8"
+					border="1px"
+					borderColor={borderColor}
+					maxW={{ base: 'full', sm: 'xs' }}
+					py={{ base: '6', sm: '8' }}
+					px={{ base: '4', sm: '6' }}
 				>
-					<Flex justify="space-between">
-						<HStack spacing="8">
-							<Logo />
-							<ButtonGroup variant="ghost" spacing="1">
-								<Button aria-current="page">Dashboard</Button>
-							</ButtonGroup>
-						</HStack>
-						<HStack>
-							<Button
-								onClick={toggleColorMode}
-								variant="ghost"
-								marginRight={{ lg: '6', sm: '-1' }}
-							>
-								{colorMode === 'dark' ? <SunIcon /> : <MoonIcon />}
-							</Button>
-							<Menu>
-								<MenuButton cursor="pointer">
-									<Avatar boxSize="10">
-										<AvatarBadge boxSize="4" bg="green.400" />
-									</Avatar>
-								</MenuButton>
-								<MenuList>
-									<MenuItem>Set Status</MenuItem>
-									<MenuItem>Sign Out</MenuItem>
-								</MenuList>
-							</Menu>
-						</HStack>
-					</Flex>
-				</Box>
-				<Box as="section" overflowY="auto" flex="1">
-					<Flex as="section" bg="bg-canvas" height="full">
-						<Flex
-							flex="1"
-							bg="bg-surface"
-							border="1px"
-							borderColor={useColorModeValue('gray.200', 'gray.700')}
-							maxW={{ base: 'full', sm: 'xs' }}
-							py={{ base: '6', sm: '8' }}
-							px={{ base: '4', sm: '6' }}
-						>
-							<Stack justify="space-between" spacing="1">
-								<Stack spacing={{ base: '5', sm: '6' }} shouldWrapChildren>
-									<InputGroup>
-										<InputLeftElement pointerEvents="none">
-											<Icon as={FiSearch} color="muted" boxSize="5" />
-										</InputLeftElement>
-										<Input placeholder="Search" />
-									</InputGroup>
-									<Stack spacing="3">
-										<Button
-											variant="ghost"
-											display="inline-block"
-											px="0"
-											height="14"
-										>
-											<Stack>
-												<HStack spacing="3">
-													<Avatar boxSize="10">
-														<Tooltip label="online">
-															<AvatarBadge boxSize="4" bg="green.400" />
-														</Tooltip>
-													</Avatar>
-													<Box>
-														<Text fontWeight="medium" color="emphasized">
-															Test Name
-														</Text>
-													</Box>
-												</HStack>
-											</Stack>
-										</Button>
-										<Button
-											variant="ghost"
-											display="inline-block"
-											px="0"
-											height="14"
-										>
-											<Stack>
-												<HStack spacing="3">
-													<Avatar boxSize="10">
-														<Tooltip label="online">
-															<AvatarBadge boxSize="4" bg="green.400" />
-														</Tooltip>
-													</Avatar>
-													<Box>
-														<Text fontWeight="medium" color="emphasized">
-															Test Name
-														</Text>
-													</Box>
-												</HStack>
-											</Stack>
-										</Button>
-										<Button
-											variant="ghost"
-											display="inline-block"
-											px="0"
-											height="14"
-										>
-											<Stack>
-												<HStack spacing="3">
-													<Avatar boxSize="10">
-														<Tooltip label="online">
-															<AvatarBadge boxSize="4" bg="green.400" />
-														</Tooltip>
-													</Avatar>
-													<Box>
-														<Text fontWeight="medium" color="emphasized">
-															Test Name
-														</Text>
-													</Box>
-												</HStack>
-											</Stack>
-										</Button>
-									</Stack>
-								</Stack>
-							</Stack>
-						</Flex>
-						<Stack as="section" spacing="0" flex="1">
-							<Box
-								bg="bg-surface"
-								px={{ base: '4', md: '6' }}
-								py="5"
-								mb="8"
-								borderTop="1px"
-								borderColor={useColorModeValue('gray.100', 'gray.700')}
-								boxShadow={useColorModeValue('sm', 'sm-dark')}
-							>
-								<Stack
-									spacing="4"
-									direction={{ base: 'column', sm: 'row' }}
-									justify="space-between"
-								>
-									<HStack spacing="4">
-										<Avatar
-											src="https://tinyurl.com/yhkm2ek8"
-											name="Christoph Winston"
-											boxSize={{ base: '12', sm: '14' }}
-										>
-											<Tooltip label="offline">
-												<AvatarBadge boxSize="4" bg="gray.400" />
-											</Tooltip>
-										</Avatar>
-										<Box>
-											<HStack>
-												<Text fontSize="lg" fontWeight="medium">
-													Christoph Winston
-												</Text>
-											</HStack>
-											<Text color="muted" fontSize="sm">
-												Company Limited
-											</Text>
-										</Box>
-									</HStack>
-								</Stack>
-							</Box>
+					<Stack justify="space-between" spacing="1">
+						<Stack spacing={{ base: '5', sm: '6' }} shouldWrapChildren>
+							<InputGroup>
+								<InputLeftElement pointerEvents="none">
+									<Icon as={FiSearch} color="muted" boxSize="5" />
+								</InputLeftElement>
+								<Input placeholder="Search" />
+							</InputGroup>
 
-							{/* Messages */}
-							<Container maxWidth="100%" flex="1">
-								<VStack alignItems="start">
-									<Flex
-										bg={useColorModeValue('gray.100', 'gray.700')}
-										rounded="md"
-										w="fit-content"
-										p="3"
-									>
-										What you having for dinner?
-									</Flex>
-									<Flex
-										bg={useColorModeValue('blue.200', 'blue.500')}
-										position="relative"
-										rounded="md"
-										w="fit-content"
-										p="3"
-										alignSelf="end"
-										_before={{
-											content: "''",
-											position: 'absolute',
-											top: '100%',
-											right: '12px',
-											borderColor: `${useColorModeValue(
-												'var(--chakra-colors-blue-200)',
-												'var(--chakra-colors-blue-500)',
-											)} transparent transparent transparent`,
-											borderStyle: 'solid',
-											borderWidth: '8px',
-										}}
-									>
-										Pizza, what about you?
-									</Flex>
-								</VStack>
-							</Container>
-							<Box p="4">
-								<HStack>
-									<Textarea placeholder="Type a message" />
-									<Button variant="primary" size="lg" marginLeft="4">
-										Send
-									</Button>
-								</HStack>
-							</Box>
+							<Stack spacing="3">
+								{app.contacts.map(contact => (
+									<UserListItem
+										key={contact.id}
+										name={contact.name}
+										status={contact.status}
+										onClick={() => app.requestUser(contact.id)}
+									/>
+								))}
+							</Stack>
 						</Stack>
-					</Flex>
+					</Stack>
+				</Flex>
+			)}
+			<Stack as="section" spacing="0" flex="1">
+				{app.contact && <ChatHeader />}
+				<Container maxWidth="100%" flex="1">
+					<VStack alignItems="start" spacing="4">
+						{app.messages.map(message => (
+							<Message
+								key={message.id}
+								content={message.content}
+								isReply={message.from !== user.id}
+							/>
+						))}
+					</VStack>
+
+					{app.showForm && (
+						<Modal
+							isOpen={app.showForm}
+							onClose={() => {}}
+							size="lg"
+							isCentered
+						>
+							<ModalOverlay />
+							<ModalContent>
+								<form method="POST" onSubmit={handleSubmit}>
+									<ModalHeader>
+										There are currently no support agents online. Send us a
+										message and we&apos;ll get back to you!
+									</ModalHeader>
+
+									<ModalBody pb={6}>
+										<FormControl mt={4} isRequired isInvalid={!!errors.message}>
+											<FormLabel>Message</FormLabel>
+											<Textarea
+												rows={8}
+												name="message"
+												placeholder="Type your message"
+											/>
+											{errors.message && (
+												<FormErrorMessage>{errors.message}</FormErrorMessage>
+											)}
+										</FormControl>
+									</ModalBody>
+
+									<ModalFooter>
+										<Button
+											colorScheme="blue"
+											mr={3}
+											type="submit"
+											isLoading={loading}
+										>
+											Send
+										</Button>
+									</ModalFooter>
+								</form>
+							</ModalContent>
+						</Modal>
+					)}
+				</Container>
+				<Box p="4">
+					{(app.contact || !app.user.roles.includes('support-agent')) && (
+						<HStack>
+							<Textarea
+								placeholder="Type a message"
+								onChange={e => setContent(e.target.value)}
+								value={content}
+							/>
+							<Button
+								variant="primary"
+								size="lg"
+								marginLeft="4"
+								onClick={() => {
+									if (!content.trim()) {
+										setContent('');
+										return alert('Message cannot be empty you dummy');
+									}
+									app.sendMessage(content, app.contact?.id);
+									setContent('');
+								}}
+							>
+								Send
+							</Button>
+						</HStack>
+					)}
 				</Box>
 			</Stack>
-		</SocketContextProvider>
+		</Flex>
+	);
+}
+
+export default function HomeWrapper({ user }: { user: Contact }) {
+	return (
+		<App user={user}>
+			<Stack spacing="0" height="100vh">
+				<Navigation userName={user.name} userEmail={user.email} />
+
+				<Home />
+
+				<Box as="section" overflowY="auto" flex="1"></Box>
+			</Stack>
+		</App>
 	);
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 	const session = await getSession(req, res);
+	await dbConnect();
+	const user = await User.findOne({ _id: session.userId });
+
+	if (!user) {
+		return {
+			redirect: {
+				destination: '/login',
+				permanent: false,
+			},
+		};
+	}
+
 	return {
 		props: {
-			id: session.id,
-			userId: session.userId ?? null,
+			user: {
+				id: user._id.toHexString(),
+				name: user.name,
+				email: user.email,
+				company: user.company,
+				status: user.status ?? 'offline',
+				roles: user.roles,
+			},
 		},
 	};
 };
