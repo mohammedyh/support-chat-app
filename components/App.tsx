@@ -1,9 +1,19 @@
-// Add authed user to AppContext - add from props of app using home or something
-
-import { fi } from 'date-fns/locale';
-import { createContext, useCallback, useEffect, useState } from 'react';
+import { createContext, useCallback, useEffect, useRef, useState } from 'react';
 import { connect, Socket } from 'socket.io-client';
 import { Contact, Message, ServerPacket } from '../lib/types';
+
+async function requestNotifications(): Promise<boolean> {
+	if (!('Notification' in window)) {
+		return false;
+	}
+
+	if (Notification.permission === 'granted') {
+		return true;
+	} else {
+		const result = await Notification.requestPermission();
+		return result === 'granted';
+	}
+}
 
 interface AppContextState {
 	contact: Contact | null;
@@ -28,6 +38,11 @@ export default function App({
 	const [messages, setMessages] = useState<AppContextState['messages']>([]);
 	const [contacts, setContacts] = useState<AppContextState['contacts']>([]);
 	const [showForm, setShowForm] = useState(false);
+	const audioRef = useRef<HTMLAudioElement | null>(null);
+
+	useEffect(() => {
+		requestNotifications();
+	}, []);
 
 	useEffect(() => {
 		const socket = connect('/', {
@@ -36,7 +51,7 @@ export default function App({
 
 		setSocket(socket);
 
-		socket.on('message', (message: ServerPacket) => {
+		socket.on('message', async (message: ServerPacket) => {
 			if (message.type === 'contacts') {
 				setContacts(message.contacts);
 			} else if (message.type === 'messages') {
@@ -45,6 +60,17 @@ export default function App({
 				}
 				setMessages(message.messages);
 			} else if (message.type === 'message') {
+				if (audioRef.current && message.from !== user.id) {
+					audioRef.current.currentTime = 0;
+					audioRef.current.play();
+
+					if (await requestNotifications()) {
+						const notification = new Notification('New message', {
+							body: message.content,
+							renotify: true,
+						});
+					}
+				}
 				if (
 					message.from === contact?.id ||
 					message.to === contact?.id ||
@@ -105,6 +131,11 @@ export default function App({
 				messages,
 			}}
 		>
+			<audio
+				src="/chat-notification-sound.mp3"
+				autoPlay={false}
+				ref={audioRef}
+			/>
 			{children}
 		</AppContext.Provider>
 	);
