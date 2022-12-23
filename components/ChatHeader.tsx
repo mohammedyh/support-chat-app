@@ -2,14 +2,26 @@ import {
 	Avatar,
 	AvatarBadge,
 	Box,
+	Button,
+	FormControl,
+	FormErrorMessage,
+	FormLabel,
 	HStack,
+	Modal,
+	ModalBody,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+	ModalOverlay,
 	Stack,
 	Text,
+	Textarea,
 	Tooltip,
 	useColorModeValue,
 } from '@chakra-ui/react';
 import { useContext } from 'react';
 import { AppContext } from './App';
+import DevicesModal from './DevicesModal';
 
 function ChatHeader() {
 	const borderColor = useColorModeValue('gray.200', 'gray.700');
@@ -32,11 +44,15 @@ function ChatHeader() {
 				spacing="4"
 				direction={{ base: 'column', sm: 'row' }}
 				justify="space-between"
+				alignItems="center"
 			>
 				<HStack spacing="4">
 					<Avatar name={app.contact?.name} boxSize={{ base: '12', sm: '14' }}>
-						<Tooltip label="offline">
-							<AvatarBadge boxSize="4" bg="green.400" />
+						<Tooltip label={app.contact?.status} textTransform="capitalize">
+							<AvatarBadge
+								boxSize="4"
+								bg={app.contact?.status === 'online' ? 'green.400' : 'gray.400'}
+							/>
 						</Tooltip>
 					</Avatar>
 					<Box>
@@ -50,6 +66,7 @@ function ChatHeader() {
 						</Text>
 					</Box>
 				</HStack>
+				{app.user.roles.includes('support-agent') && <DevicesModal />}
 			</Stack>
 		</Box>
 	);

@@ -29,7 +29,7 @@ function UserListItem({
 			<Stack>
 				<HStack spacing="3">
 					<Avatar boxSize="10" name={name}>
-						<Tooltip label={status}>
+						<Tooltip label={status} textTransform="capitalize">
 							<AvatarBadge
 								boxSize="4"
 								bg={status === 'online' ? 'green.400' : 'gray.400'}
