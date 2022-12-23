@@ -2,7 +2,8 @@
 // Play sound when new message comes in.
 
 import * as cookie from 'cookie';
-import { Server as NetServer, Server } from 'http';
+import { Server as NetServer } from 'http';
+import _ from 'lodash';
 import { NextApiRequest } from 'next';
 import { Server as ServerIO, Socket } from 'socket.io';
 import dbConnect from '../../lib/dbConnect';
@@ -170,6 +171,16 @@ async function socketInit(io: ServerIO) {
 		}
 
 		user.status = 'online';
+		user.devices = _.uniqWith(
+			[
+				...(user.devices ?? []),
+				{
+					ip: socket.handshake.address,
+					userAgent: socket.handshake.headers['user-agent'],
+				},
+			],
+			(a, b) => a.ip === b.ip && a.userAgent === b.userAgent,
+		);
 		await user.save();
 
 		if (isSupportAgent) {

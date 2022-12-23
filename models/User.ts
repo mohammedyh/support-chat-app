@@ -7,6 +7,7 @@ export interface IUser extends Document {
 	password: string;
 	status: string;
 	roles: string[];
+	devices: Array<{ ip: string; userAgent?: string }>;
 }
 
 const UserSchema = new mongoose.Schema<IUser>({
@@ -16,6 +17,7 @@ const UserSchema = new mongoose.Schema<IUser>({
 	password: String,
 	status: String,
 	roles: Array,
+	devices: Array,
 });
 
 UserSchema.set('timestamps', true);
