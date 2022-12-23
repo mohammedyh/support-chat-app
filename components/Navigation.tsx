@@ -77,7 +77,6 @@ function Navigation({
 								mt="2"
 								mb="0"
 							/>
-							<MenuItem>Set Status</MenuItem>
 							<MenuItem onClick={handleLogout}>Log Out</MenuItem>
 						</MenuList>
 					</Menu>

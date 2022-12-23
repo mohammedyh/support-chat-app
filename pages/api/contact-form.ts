@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { messageSchema } from '../../lib/auth';
+import { messageSchema } from '../../lib/schemas';
 import dbConnect from '../../lib/dbConnect';
 import { SUPPORT_EMAIL_ADDRESS, transporter } from '../../lib/nodemailer';
 import { getSession } from '../../lib/session';

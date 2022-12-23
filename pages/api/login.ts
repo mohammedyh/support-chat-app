@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcryptjs';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { loginSchema } from '../../lib/auth';
+import { loginSchema } from '../../lib/schemas';
 import dbConnect from '../../lib/dbConnect';
 import { getSession } from '../../lib/session';
 import validate from '../../lib/validate';

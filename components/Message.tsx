@@ -31,7 +31,6 @@ function Message({
 				top: '100%',
 				right: `${isReply === false ? '12px' : 'unset'}`,
 				left: `${isReply ? '12px' : 'unset'}`,
-				// if message is a reply, make borders gray else make borders blue
 				borderColor: `${
 					isReply ? replyMessageColor : userMessageColor
 				} transparent transparent transparent`,
