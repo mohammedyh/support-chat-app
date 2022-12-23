@@ -14,7 +14,7 @@ const MessageSchema = new mongoose.Schema<IMessage>({
 	content: String,
 	removedAt: {
 		type: Date,
-		default: () => addMinutes(new Date(), 1),
+		default: () => addMinutes(new Date(), 15),
 		expires: 0,
 	},
 });
