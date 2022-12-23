@@ -20,6 +20,7 @@ import {
 	Stack,
 	Textarea,
 	useColorModeValue,
+	useToast,
 	VStack,
 } from '@chakra-ui/react';
 import { GetServerSideProps } from 'next';
@@ -30,7 +31,7 @@ import ChatHeader from '../components/ChatHeader';
 import Message from '../components/Message';
 import Navigation from '../components/Navigation';
 import UserListItem from '../components/UserListItem';
-import { messageSchema } from '../lib/auth';
+import { messageSchema } from '../lib/schemas';
 import dbConnect from '../lib/dbConnect';
 import { getSession } from '../lib/session';
 import { Contact } from '../lib/types';
@@ -51,6 +52,8 @@ function Home() {
 			value: any;
 		}[];
 	} | null>(null);
+	const toast = useToast();
+
 	const errors = useMemo(() => {
 		if (response?.errors?.length) {
 			const errors: Record<string, string> = {};
@@ -71,8 +74,6 @@ function Home() {
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		setLoading(true);
-
-		// Handle empty textarea
 
 		const formData = new FormData(e.currentTarget);
 		const data = { message: formData.get('message') };
@@ -129,7 +130,7 @@ function Home() {
 					</Stack>
 				</Flex>
 			)}
-			<Stack as="section" spacing="0" flex="1">
+			<Stack as="section" spacing="0" flex="1" pt={!app.contact ? 8 : 0}>
 				{app.contact && <ChatHeader />}
 				<Container maxWidth="100%" flex="1">
 					<VStack alignItems="start" spacing="4">
@@ -201,7 +202,14 @@ function Home() {
 								onClick={() => {
 									if (!content.trim()) {
 										setContent('');
-										return alert('Message cannot be empty you dummy');
+										return toast({
+											position: 'top-right',
+											title: 'Error',
+											description: 'Message cannot be empty',
+											status: 'error',
+											duration: 3000,
+											isClosable: true,
+										});
 									}
 									app.sendMessage(content, app.contact?.id);
 									setContent('');
