@@ -11,18 +11,21 @@ import {
 	Stack,
 	Text,
 	useBreakpointValue,
+	useColorMode,
+	useColorModeValue,
 } from '@chakra-ui/react';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
 import Logo from '../components/Logo';
-import { registerSchema } from '../lib/auth';
+import { registerSchema } from '../lib/schemas';
 import { getSession } from '../lib/session';
 import validate from '../lib/validate';
 
 function Register() {
 	const router = useRouter();
+	const { colorMode } = useColorMode();
 	const [loading, setLoading] = useState(false);
 	const [response, setResponse] = useState<{
 		success: boolean;
@@ -156,9 +159,18 @@ function Register() {
 						<Stack spacing="4">
 							<Button
 								variant="solid"
-								backgroundColor="black"
+								backgroundColor={useColorModeValue(
+									'blackAlpha.900',
+									'blue.400',
+								)}
 								color="white"
-								_hover={{ background: 'rgba(0, 0, 0, 0.75)' }}
+								_hover={{
+									backgroundColor() {
+										return colorMode === 'light'
+											? 'var(--chakra-colors-blackAlpha-700)'
+											: 'var(--chakra-colors-blue-600)';
+									},
+								}}
 								type="submit"
 								isLoading={loading}
 							>

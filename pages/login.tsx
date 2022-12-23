@@ -11,19 +11,20 @@ import {
 	Text,
 	useBreakpointValue,
 	useColorMode,
+	useColorModeValue,
 } from '@chakra-ui/react';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
 import Logo from '../components/Logo';
-import { loginSchema } from '../lib/auth';
+import { loginSchema } from '../lib/schemas';
 import { getSession } from '../lib/session';
 import validate from '../lib/validate';
 
 function Login({ csrfToken }: { csrfToken: string }) {
-	const { colorMode } = useColorMode();
 	const router = useRouter();
+	const { colorMode } = useColorMode();
 	const [loading, setLoading] = useState(false);
 	const [response, setResponse] = useState<{
 		success: boolean;
@@ -87,7 +88,7 @@ function Login({ csrfToken }: { csrfToken: string }) {
 	return (
 		<Container maxW="md" py={{ base: '12', md: '24' }}>
 			<Stack spacing="8">
-				<Stack spacing="6">
+				<Stack spacing="6" align="center">
 					<Logo />
 					<Stack spacing={{ base: '2', md: '3' }} textAlign="center">
 						<Heading size={useBreakpointValue({ base: 'xs', md: 'sm' })}>
@@ -130,9 +131,18 @@ function Login({ csrfToken }: { csrfToken: string }) {
 						<Stack spacing="4">
 							<Button
 								variant="solid"
-								backgroundColor="black"
+								backgroundColor={useColorModeValue(
+									'blackAlpha.900',
+									'blue.400',
+								)}
 								color="white"
-								_hover={{ background: 'rgba(0, 0, 0, 0.75)' }}
+								_hover={{
+									backgroundColor() {
+										return colorMode === 'light'
+											? 'var(--chakra-colors-blackAlpha-700)'
+											: 'var(--chakra-colors-blue-600)';
+									},
+								}}
 								type="submit"
 								isLoading={loading}
 							>
