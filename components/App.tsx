@@ -77,10 +77,7 @@ export default function App({
 					message.to === user.id ||
 					message.from === user.id
 				) {
-					setMessages(prevMessages => {
-						const messages = [...prevMessages, message];
-						return messages;
-					});
+					setMessages(prevMessages => [...prevMessages, message]);
 				}
 			} else if (message.type === 'showForm') {
 				setShowForm(true);

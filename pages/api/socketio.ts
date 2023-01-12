@@ -1,6 +1,3 @@
-// Idea: When someones sends a message for the first time send an automated response saying the agent will look into the request shortly
-// Play sound when new message comes in.
-
 import * as cookie from 'cookie';
 import { Server as NetServer } from 'http';
 import _ from 'lodash';

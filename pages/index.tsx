@@ -24,7 +24,13 @@ import {
 	VStack,
 } from '@chakra-ui/react';
 import { GetServerSideProps } from 'next';
-import React, { useContext, useMemo, useState } from 'react';
+import React, {
+	useCallback,
+	useContext,
+	useMemo,
+	useRef,
+	useState,
+} from 'react';
 import { FiSearch } from 'react-icons/fi';
 import App, { AppContext } from '../components/App';
 import ChatHeader from '../components/ChatHeader';
@@ -40,6 +46,7 @@ import User from '../models/User';
 
 function Home() {
 	const borderColor = useColorModeValue('gray.200', 'gray.700');
+	const boxShadow = useColorModeValue('sm', 'sm-dark');
 	const app = useContext(AppContext);
 	const [content, setContent] = useState('');
 	const [loading, setLoading] = useState(false);
@@ -53,6 +60,7 @@ function Home() {
 		}[];
 	} | null>(null);
 	const toast = useToast();
+	const [modalFormContent, setModalFormContent] = useState('');
 
 	const errors = useMemo(() => {
 		if (response?.errors?.length) {
@@ -93,6 +101,16 @@ function Home() {
 
 		setResponse(response);
 		setLoading(false);
+		setModalFormContent('');
+
+		toast({
+			position: 'top-right',
+			title: 'Success',
+			description: 'Message sent',
+			status: 'success',
+			duration: 3000,
+			isClosable: true,
+		});
 	}
 
 	return (
@@ -165,7 +183,20 @@ function Home() {
 												rows={8}
 												name="message"
 												placeholder="Type your message"
+												onChange={e => setModalFormContent(e.target.value)}
+												value={modalFormContent}
 											/>
+											<Box
+												width="fit-content"
+												boxShadow={boxShadow}
+												rounded="base"
+												mt='2'
+												px="2"
+												py="1"
+												background="bg-surface"
+											>
+												{modalFormContent.length}
+											</Box>
 											{errors.message && (
 												<FormErrorMessage>{errors.message}</FormErrorMessage>
 											)}

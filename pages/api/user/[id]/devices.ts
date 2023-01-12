@@ -1,4 +1,3 @@
-// return json of devices for user
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from '../../../../lib/session';
 import User from '../../../../models/User';
@@ -16,7 +15,7 @@ export default async function handler(
 
 	const user = await User.findOne({ _id: session.userId });
 	if (!user || !user.roles.includes('support-agent')) {
-		return res.status(400).json({ success: false });
+		return res.status(403).json({ success: false });
 	}
 
 	const requestedUser = await User.findOne({ _id: id });

@@ -3,6 +3,7 @@ import {
 	Checkbox,
 	Container,
 	FormControl,
+	FormErrorMessage,
 	FormLabel,
 	Heading,
 	HStack,
@@ -101,32 +102,33 @@ function Login({ csrfToken }: { csrfToken: string }) {
 					<input name="csrfToken" type="hidden" defaultValue={csrfToken} />
 					<Stack spacing="6">
 						<Stack spacing="5">
-							<FormControl isRequired>
+							<FormControl isRequired isInvalid={!!errors.email}>
 								<FormLabel htmlFor="email">Email</FormLabel>
 								<Input
 									id="email"
 									name="email"
 									placeholder="elon@tesla.com"
 									type="email"
-									defaultValue="mo@birdmarketing.co.uk"
 								/>
+								{errors.email && (
+									<FormErrorMessage>{errors.email}</FormErrorMessage>
+								)}
 							</FormControl>
-							<FormControl isRequired>
+							<FormControl isRequired isInvalid={!!errors.password}>
 								<FormLabel htmlFor="password">Password</FormLabel>
 								<Input
 									id="password"
 									name="password"
 									placeholder="********"
 									type="password"
-									defaultValue="password"
 								/>
+								{errors.password && (
+									<FormErrorMessage>{errors.password}</FormErrorMessage>
+								)}
 							</FormControl>
 						</Stack>
 						<HStack justify="space-between">
 							<Checkbox defaultChecked>Remember me</Checkbox>
-							<Button variant="link" colorScheme="blue" size="sm">
-								Forgot password
-							</Button>
 						</HStack>
 						<Stack spacing="4">
 							<Button
